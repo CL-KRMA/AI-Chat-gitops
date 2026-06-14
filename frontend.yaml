@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-chat-frontend
+  namespace: ai-chat
+  labels:
+    app: ai-chat-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-chat-frontend
+  template:
+    metadata:
+      labels:
+        app: ai-chat-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/<ton-org>/ai-chat-app:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: OLLAMA_API_URL
+              value: "http://ollama:11434"
+            - name: NODE_ENV
+              value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-chat-frontend
+  namespace: ai-chat
+spec:
+  selector:
+    app: ai-chat-frontend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
