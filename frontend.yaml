@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/cl-krma/ai-chat-app:2db534c6cf8f5a550c9a88723998630cce519cc0
+          image: ghcr.io/cl-krma/ai-chat-app:d76256554796d2cb758a033dbe7930da0e2c28c2
           ports:
             - containerPort: 3000
           env:
