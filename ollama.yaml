@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: ai-chat
+  labels:
+    app: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      initContainers:
+        - name: pull-models
+          image: ollama/ollama:latest
+          command: [ "sh", "-c" ]
+          args:
+            - >
+              ollama serve &
+              OLLAMA_PID=$! &&
+              echo "Attente démarrage Ollama..." &&
+              sleep 10 &&
+              echo "Pull llama3:8b (~5GB)..." &&
+              ollama pull llama3:8b &&
+              echo "Pull llava:7b (~4GB)..." &&
+              ollama pull llava:7b &&
+              echo "Pull gemma4:12b (~7.6GB)..." &&
+              ollama pull gemma4:12b &&
+              echo "Tous les modèles téléchargés." &&
+              kill $OLLAMA_PID
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+          resources:
+            requests:
+              memory: "8Gi"
+              cpu: "2"
+            limits:
+              memory: "16Gi"
+              cpu: "4"
+
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          command: ["ollama", "serve"]
+          ports:
+            - containerPort: 11434
+              name: http
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+          resources:
+            requests:
+              memory: "16Gi"
+              cpu: "4"
+            limits:
+              memory: "32Gi"
+              cpu: "8"
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 11434
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 11434
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 5
+
+      volumes:
+        - name: ollama-data
+          persistentVolumeClaim:
+            claimName: ollama-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-pvc
+  namespace: ai-chat
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 30Gi   # llama3:8b (~5GB) + llava:7b (~4GB) + gemma4:12b (~7.6GB) + marge
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: ai-chat
+spec:
+  selector:
+    app: ollama
+  ports:
+    - protocol: TCP
+      port: 11434
+      targetPort: 11434
+      name: http
