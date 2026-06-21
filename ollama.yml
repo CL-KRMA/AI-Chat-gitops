@@ -30,6 +30,7 @@ spec:
               sleep 5 &&
               ollama pull llama3:8b &&
               ollama pull llava:7b &&
+              ollama pull gemma:12b &&
               tail -f /dev/null
       volumes:
         - name: ollama-data
