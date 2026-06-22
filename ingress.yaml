@@ -3,9 +3,8 @@ kind: Ingress
 metadata:
   name: ai-chat-ingress
   namespace: ai-chat
-  annotations:
-    kubernetes.io/ingress.class: traefik
 spec:
+  ingressClassName: traefik
   rules:
     - host: ai-chat.com
       http:
@@ -16,4 +15,4 @@ spec:
               service:
                 name: ai-chat-frontend
                 port:
-                  number: 3000
+                  number: 80
