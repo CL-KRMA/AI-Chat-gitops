@@ -264,7 +264,7 @@ argocd app sync ai-chat
 ## 📚 Repos liés
 
 - [AI-Chat-app](https://github.com/CL-KRMA/AI-Chat-app) — code source Next.js + pipeline CI/CD
-- [aws-terraform-config](https://github.com/CL-KRMA/aws-terraform-config) — infrastructure AWS (K3s cluster)
+- [AI-Chat-infra](https://github.com/CL-KRMA/AI-Chat-infra) — infrastructure AWS (K3s cluster)
 
 ## 📝 Licence
 
